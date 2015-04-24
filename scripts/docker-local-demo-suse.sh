@@ -7,15 +7,15 @@
 ) &&
 
 cd $(dirname "$0")/../server &&
-ln -sf Dockerfile.ubuntu Dockerfile &&
+ln -sf Dockerfile.suse Dockerfile &&
+ln -sf fig.yml.suse fig.yml &&
 
 cd ../client &&
-ln -sf Dockerfile.ubuntu Dockerfile &&
-ln -sf Dockerfile-dev.ubuntu Dockerfile-dev &&
+ln -sf Dockerfile.suse Dockerfile &&
+ln -sf Dockerfile-dev.suse Dockerfile-dev &&
 
 cd ../docker &&
-. ./docker-compose.yml.sh > ./docker-compose.yml &&
-
+. ./docker-compose-suse.yml.sh > ./docker-compose.yml &&
 echo '
 |=================================================================|
 |open in browser "http://localhost:80" after server will be ready |

@@ -1,0 +1,30 @@
+# import base image
+#FROM dockerfile/nodejs
+FROM opensuse:latest
+
+# install system-wide dependencies
+RUN zypper ar http://download.opensuse.org/repositories/server:/http/openSUSE_13.2/server:http.repo && \
+    zypper --gpg-auto-import-keys update -l --no-recommends && \
+    zypper -n install --no-recommends \
+      nodejs nodejs-devel patterns-openSUSE-devel_basis \
+      libfreetype6 fontconfig nginx && \
+    echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
+    mkdir -p /etc/nginx/vhosts.d/ && \
+    npm -g install grunt-cli bower
+
+# setup the environment
+WORKDIR	/opt/superdesk-client/
+COPY ./superdesk_vhost.conf /etc/nginx/vhosts.d/superdesk.conf
+EXPOSE	9000
+EXPOSE	80
+CMD ["sh", "-c" "grunt build && nginx"]
+
+# install app-wide dependencies
+COPY ./package.json /opt/superdesk-client/
+RUN npm install
+COPY ./bower.json /opt/superdesk-client/
+COPY ./.bowerrc /opt/superdesk-client/
+RUN bower --allow-root install
+
+# copy sources
+COPY . /opt/superdesk-client

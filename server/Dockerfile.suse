@@ -1,0 +1,31 @@
+# import base image
+FROM opensuse:latest
+
+# install python3 and the build-time dependencies for c modules
+RUN zypper --gpg-auto-import-keys update -l --no-recommends && \
+    zypper -n install --no-recommends \
+      python3 python3-devel python3-pip python3-six \
+      patterns-openSUSE-devel_C_C++ coreutils binutils \
+      libffi48-devel git mercurial \
+      libtiff-devel libjpeg8-devel zlib-devel \
+      freetype2-devel liblcms2-devel libwebp-devel \
+      curl ca-certificates-mozilla
+
+# setup the environment
+WORKDIR /srv/superdesk/
+CMD ["honcho", "start"]
+
+EXPOSE 5000
+EXPOSE 5100
+
+ENV PYTHONUNBUFFERED 1
+ENV C_FORCE_ROOT "False"
+ENV CELERYBEAT_SCHEDULE_FILENAME /tmp/celerybeatschedule.db
+
+# install dependencies
+ADD requirements.txt /tmp/requirements.txt
+RUN ifconfig && route -n && ping -c5 pypi.python.org
+RUN cd /tmp && pip3 install -U -r /tmp/requirements.txt || (cat /root/.pip/pip.log && exit 1)
+
+# copy application source code
+ADD . /srv/superdesk
